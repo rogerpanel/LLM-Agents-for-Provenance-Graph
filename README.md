@@ -2,9 +2,8 @@
 
 Code, benchmark, results and manuscript for:
 
-> **Grounded, Budget-Aware LLM Agents for Provenance-Graph Alert Investigation:
-> Design, Ablation, and a Cross-Platform Benchmark from Public Attack Telemetry**
-> Roger Nick Anaedevha, 2026 (manuscript in `paper/`).
+> **Robust LLM Agents for Provenance-Graph Alert Triage: Grounding, Budgets, and Shortcut Cues**
+> Anonymous Authors, 2026 (manuscript under review).
 
 A security operations centre (SOC) analyst who receives an alert walks the
 evidence behind it (which process started what, which file it wrote, where
@@ -15,9 +14,39 @@ response. This repository contains:
 |---|---|
 | [`agent/`](agent/) | An LLM investigation agent that walks an evidence graph through a small tool interface (`search`, `get_entity`, `get_relation`, `finish_investigation`) under a tool-call budget. Local safeguards (response cache, schema validation, grounding check, budgets, deadline) avoid spending calls on mistakes; each can be switched off for ablation. |
 | [`benchmark/`](benchmark/) | **SOCGraph-21**: 21 investigation tasks built from public attack telemetry: 11 Windows tasks from OTRF Security-Datasets and 10 Linux tasks from Splunk attack_data (Sysmon for Linux). 15 real attacks and 6 real benign look-alikes recorded on the same machines, with ground truth. One 0.55 MB zip. |
-| [`results/`](results/) | The pilot run (11 Windows tasks) and, once run, the full study and ablation runs. |
-| [`scripts/`](scripts/) | `results_to_tex.py`: turns run folders into the paper's tables, figure data and macros. |
-| [`paper/`](paper/) | The manuscript as an Overleaf-ready LaTeX project (IEEEtran). |
+| [`results/`](results/) | The pilot run (11 Windows tasks), the study (three repeats of the ablation suite on all 21 tasks, 17 runs) and the per-call traces of every run. |
+| [`scripts/`](scripts/) | `results_to_tex.py` turns run folders into the paper's tables, figure data and macros (with paired bootstrap intervals); `console_to_runs.py` builds run folders from console output; `benchmark_to_tex.py` the benchmark tables. |
+
+## Results at a glance
+
+Claude Opus 5.5, effort high, SOCGraph-21 v1.1, three repeats (`results/`, paper Section VII):
+
+| Configuration | Reward | Quality | Efficiency | Verdict accuracy | False positives | Calls/task |
+|---|---|---|---|---|---|---|
+| Full agent | 0.775 ± 0.012 | 0.836 | 0.626 | 97% (61/63) | 0 | 8.22 |
+| No investigation-method prompt | 0.737 ± 0.022 | 0.830 | 0.432 | 94% (59/63) | 0 | 11.70 |
+| Full agent, `blind` variant (label cues removed) | 0.769 ± 0.007 | 0.836 | 0.586 | 95% | 0 | 9.00 |
+| Full agent, `mimicry` variant (attacker names renamed) | 0.694 ± 0.038 | 0.754 | 0.572 | 86% | 0 | 9.22 |
+
+- The investigation-method prompt is what makes the agent efficient: without
+  it, more calls on 20 of the 20 tasks where the count differed (sign test
+  p < 0.001) and reward −0.038 (95% CI −0.077 to −0.004), at unchanged
+  quality.
+- Turning off the cache, validation, grounding check or budget had no
+  measurable effect with this model (paired differences within ±0.005
+  excluding one unstable task, all 95% intervals containing zero).
+- All verdict errors of the full agent were on one ambiguous task: an
+  operator's service stop that shares its alert with a benign twin.
+- Per-call traces (`results/traces/`) show why the safeguards did not matter
+  (they fired on 6 calls in 63 tasks) and what did cost quality: hosts named
+  by hostname instead of entity id (144 of 247 correct malicious reports), an
+  efficiency instruction in the prompt, and label cues in the public
+  recordings, cited in 15% of submissions.
+- Removing those label cues changed nothing (`blind`), but renaming
+  attacker-chosen artefacts without changing behaviour (`rootkit.ko` to
+  `hidmon.ko`, `atomic_user1` to `jsmith`) raised missed attacks from 2/45 to
+  9/45 and cut reward by 0.081 (95% CI −0.179 to −0.007): on dual-use Linux
+  behaviour the verdict rested on names the attacker chose (`mimicry`).
 
 ## Quick start
 
@@ -56,10 +85,15 @@ Copy the run folders from `bluesec1-agent/traces/` into `results/study/`
 
 ```bash
 python scripts/results_to_tex.py --pilot results/pilot-2026-10-10 \
-    --runs "results/study/*/" --baseline full --out paper
+    --runs "results/study/*/" --cue-runs "results/cues/*/" --baseline full \
+    --sensitivity-exclude linux-service-stopped --out paper
+python scripts/trace_stats.py --pack benchmark/socgraph-21-v1.1.zip --runs "results/study/*/" --out paper
+python scripts/trace_stats.py --pack benchmark/socgraph-21-v1.1.zip --runs "results/cues/*/" --out paper \
+    --prefix TrCue --table cue_interface.tex --macros cue_trace_macros.tex
+python scripts/sensitivity.py --pack benchmark/socgraph-21-v1.1.zip --runs "results/study/*/" --out paper
 ```
 
-Then upload `paper/` to Overleaf (or run `latexmk -pdf main.tex` in `paper/`).
+These commands write every table, figure input and number quoted in the paper to `paper/` (the manuscript itself is submitted separately).
 
 ## Reproducibility notes
 
