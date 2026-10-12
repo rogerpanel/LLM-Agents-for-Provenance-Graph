@@ -1,4 +1,4 @@
-$ uv run --with anthropic --with jsonschema --env-file .env python -m bluesec1_agent.robust.cli --pack robustidps-bluesec-pack.zip --concurrency 4 --ablation-suite
+$ uv run --with anthropic --with jsonschema --env-file .env python -m bluesec1_agent.robust.cli --pack socgraph-pack.zip --concurrency 4 --ablation-suite
 == ablation suite: full
 2026-10-11 20:22:56.909 | INFO | Task lsass-dump-comsvcs terminated: quality=0.944 efficiency=0.714 reward=0.890 calls=7 [1 done]
 2026-10-11 20:23:00.316 | INFO | Task logon-script-persistence terminated: quality=0.917 efficiency=0.714 reward=0.864 calls=7 [2 done]
