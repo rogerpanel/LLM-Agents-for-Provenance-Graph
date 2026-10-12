@@ -1,4 +1,4 @@
-"""RobustIDPS investigation agent for the BlueSec1 runtime.
+"""SOCGraph investigation agent for the BlueSec1 runtime.
 
 Installed into a clone of the organisers' reference agent as
 `src/bluesec1_agent/robust/` (see bluesec/install.sh). It uses their runtime

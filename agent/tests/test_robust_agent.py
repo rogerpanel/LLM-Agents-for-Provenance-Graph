@@ -1,4 +1,4 @@
-"""Tests for the RobustIDPS agent (copied into the reference repo's tests/)."""
+"""Tests for the SOCGraph agent (copied into the reference repo's tests/)."""
 import asyncio
 import json
 from pathlib import Path

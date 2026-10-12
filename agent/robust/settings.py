@@ -1,4 +1,4 @@
-"""Settings for the RobustIDPS agent. Reads the same .env as the reference agent."""
+"""Settings for the SOCGraph agent. Reads the same .env as the reference agent."""
 from __future__ import annotations
 
 import datetime
@@ -30,8 +30,8 @@ class RobustSettings(BaseSettings):
     scenario_runtime_token: SecretStr | None = Field(None, alias="SCENARIO_RUNTIME_TOKEN")
     scenario_runtime_verify_tls: bool = Field(True, alias="SCENARIO_RUNTIME_VERIFY_TLS")
     scenario_runtime_arena: str | None = Field(None, alias="SCENARIO_RUNTIME_ARENA")
-    remote_run_label: str = Field("robustidps-agent", alias="REMOTE_RUN_LABEL")
-    agent_name: str = Field("robustidps-agent", alias="AGENT_NAME", max_length=255)
+    remote_run_label: str = Field("socgraph-agent", alias="REMOTE_RUN_LABEL")
+    agent_name: str = Field("socgraph-agent", alias="AGENT_NAME", max_length=255)
 
     # Which model drives the loop.
     provider: Literal["anthropic", "openai"] = Field("anthropic", alias="ROBUST_PROVIDER")

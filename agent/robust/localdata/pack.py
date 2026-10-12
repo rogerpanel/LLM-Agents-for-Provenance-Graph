@@ -1,7 +1,7 @@
 """Build and load a self-contained practice pack (one zip, no downloads needed).
 
-    python -m bluesec1_agent.robust.localdata.pack --out robustidps-bluesec-pack.zip
-    python -m bluesec1_agent.robust.cli --pack robustidps-bluesec-pack.zip
+    python -m bluesec1_agent.robust.localdata.pack --out socgraph-pack.zip
+    python -m bluesec1_agent.robust.cli --pack socgraph-pack.zip
 
 Layout of the zip:
     manifest.json         pack metadata and the task index (no answers)
@@ -29,7 +29,7 @@ from .fetch import load_tasks
 from .graph import Graph
 from .scenarios import BY_ID, OTRF_BASE, SOURCE_LABEL, SPLUNK_BASE, Scenario, Task
 
-PACK_FORMAT = "robustidps-bluesec-pack/1"
+PACK_FORMAT = "socgraph-pack/1"
 # Ground-truth revision. 1.1: session processes and accounts are acceptable on
 # Linux too; benign citations of the trigger's lineage are neutral.
 PACK_VERSION = "1.1"
@@ -70,7 +70,7 @@ def answer_record(t: Task) -> dict[str, Any]:
 def build_pack(tasks: list[Task], out: Path) -> dict[str, Any]:
     manifest = {
         "format": PACK_FORMAT,
-        "name": "RobustIDPS BlueSec practice pack",
+        "name": "SOCGraph practice pack",
         "version": PACK_VERSION,
         "created": datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "tasks": [
@@ -154,7 +154,7 @@ def _readme(manifest: dict[str, Any]) -> str:
     )
     sources = "\n".join(sorted({f"- {t['source']} `{t['source_dataset']}`: {t['source_url']}"
                                 for t in manifest["tasks"]}))
-    return f"""# RobustIDPS BlueSec practice pack
+    return f"""# SOCGraph practice pack
 
 Investigation tasks built from public attack telemetry, in the evidence-graph
 form used by the BlueSec competition runtime (entities and typed relations).
@@ -169,7 +169,7 @@ Created {manifest['created']}.
     uv run --with anthropic --with jsonschema --env-file .env \\
         python -m bluesec1_agent.robust.cli --pack this-pack.zip --concurrency 4
 
-Then import the run folder on robustidps.ai > BlueSec Runs.
+Run folders can be inspected with any JSON viewer.
 
 ## How it was built
 
@@ -190,7 +190,7 @@ Then import the run folder on robustidps.ai > BlueSec Runs.
 Sources:
 {sources}
 
-## Scoring (RobustIDPS, not the competition's)
+## Scoring (ours, not the competition's)
 
 Quality = half verdict, half artifacts. Malicious: F1 of recall over `core`
 (full credit for a fitting response kind, half for another kind) and
@@ -208,7 +208,7 @@ Reward = quality x (0.8 + 0.2 x efficiency).
 def main() -> None:
     ap = argparse.ArgumentParser(description="Build the practice pack zip")
     ap.add_argument("--data-dir", default="datasets")
-    ap.add_argument("--out", default="robustidps-bluesec-pack.zip")
+    ap.add_argument("--out", default="socgraph-pack.zip")
     args = ap.parse_args()
     tasks = load_tasks(Path(args.data_dir))
     manifest = build_pack(tasks, Path(args.out))

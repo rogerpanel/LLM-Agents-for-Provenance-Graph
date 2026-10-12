@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Install the RobustIDPS agent into a clone of the BlueSec1 reference agent.
+# Install the SOCGraph agent into a clone of the BlueSec1 reference agent.
 #   bash bluesec/install.sh /path/to/bluesec1-agent
 # The reference client and agent are left untouched; ours is added as
 # src/bluesec1_agent/robust/ plus one test file.

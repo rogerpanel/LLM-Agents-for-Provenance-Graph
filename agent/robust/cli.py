@@ -29,7 +29,7 @@ from .settings import RobustSettings
 
 
 def build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(description="RobustIDPS investigation agent for BlueSec1")
+    p = argparse.ArgumentParser(description="SOCGraph investigation agent for BlueSec1")
     p.add_argument("--mock", action="store_true",
                    help="run against the built-in offline mock instead of the competition")
     p.add_argument("--local", nargs="?", const="all", metavar="IDS",
@@ -166,7 +166,7 @@ async def run(args: argparse.Namespace) -> dict[str, Any]:
             agent_name=s.agent_name,
             model_name=s.model_label(),
             arena=s.scenario_runtime_arena,
-            metadata={"agent": s.agent_name, "implementation": "robustidps-hypothesis-agent",
+            metadata={"agent": s.agent_name, "implementation": "socgraph-hypothesis-agent",
                       "model": s.model_label()},
         ) as client:
             return await RobustAgent(s, llm).run(client)
